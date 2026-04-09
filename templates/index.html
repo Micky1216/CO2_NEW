@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CO₂ Goal Seek System</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 520px;
+            margin: 40px auto;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+        }
+
+        button {
+            background: #007BFF;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 20px;
+            background: #f3f3f3;
+            padding: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Indoor CO₂ Inverse Model Solver</h2>
+
+<label>Area (B2):</label>
+<input type="number" id="area">
+
+<label>Number of Persons (B5):</label>
+<input type="number" id="persons">
+
+<label>CO₂ Back (F2):</label>
+<input type="number" id="co2">
+
+<label>CO₂ Median (TARGET for G305):</label>
+<input type="number" id="co2_median">
+
+<button onclick="run()">Solve B7</button>
+
+<div id="result">
+    <p><b>Status:</b> <span id="status">Idle</span></p>
+    <p><b>Target CO₂ Median:</b> <span id="target">-</span></p>
+    <p><b>Computed B7:</b> <span id="b7">-</span></p>
+    <p><b>G305 (Check):</b> <span id="g305">-</span></p>
+</div>
+
+<script>
+function run() {
+
+    let payload = {
+        area: document.getElementById("area").value,
+        persons: document.getElementById("persons").value,
+        co2: document.getElementById("co2").value,
+        co2_median: document.getElementById("co2_median").value
+    };
+
+    for (let k in payload) {
+        if (!payload[k]) {
+            alert("Please fill all fields");
+            return;
+        }
+    }
+
+    document.getElementById("status").innerText = "Processing...";
+
+    fetch("/process", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.status === "success") {
+            document.getElementById("status").innerText = "Success";
+            document.getElementById("b7").innerText = data.B7;
+            document.getElementById("g305").innerText = data.G305;
+            document.getElementById("target").innerText = data.target_CO2_median;
+        } else {
+            document.getElementById("status").innerText = "Error";
+            alert(data.message);
+        }
+
+    })
+    .catch(() => {
+        document.getElementById("status").innerText = "Server Error";
+    });
+}
+</script>
+
+</body>
+</html>
