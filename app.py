@@ -45,7 +45,7 @@ def process():
         app_excel.screen_updating = False
 
         wb = app_excel.books.open(os.path.abspath(FILE_PATH))
-        ws = wb.sheets[0]
+        ws = wb.sheets["Inquinanti_insieme"]
 
         # -----------------------------
         # WRITE INPUTS
